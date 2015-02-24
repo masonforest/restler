@@ -284,6 +284,33 @@ module.exports['Basic'] = {
 
 };
 
+module.exports['Service'] = {
+  setUp: setup(echoResponse),
+  tearDown: teardown(),
+  'Should instantiate a client': function (test) {
+    var Service = rest.service(function(){});
+    var client = new Service();
+
+    client.get(host).on('complete', function(data) {
+      test.re(data, /^GET/, 'should be GET');
+      test.done();
+    });
+  },
+  'Should not override query defaults': function (test) {
+    var Service = rest.service(function(default_value){
+      this.defaults.data = { "key": default_value}
+    });
+    var client = new Service("default_value");
+
+    client.get(host,{ data: {}}).on(
+      'complete',
+      function(data) {
+        test.re(data, /\r\n\r\nkey=default_value/, 'should have the defualt value in the body');
+        test.done();
+      });
+  },
+};
+
 module.exports['Multipart'] = {
 
   setUp: setup(echoResponse),
